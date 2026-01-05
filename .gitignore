@@ -1,0 +1,83 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual Environment
+venv/
+env/
+ENV/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Selenium
+*.log
+geckodriver.log
+chromedriver.log
+
+# Reports
+reports/*.json
+monitoring-*.json
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Temporary files
+*.tmp
+
+# ===== ARCHIVOS QUE NO DEBEN SUBIRSE (DELATAN IA) =====
+# Informe y documentación interna
+Informe_Tarea*.txt
+*Informe*.txt
+
+# Guías y prompts que delatan uso de IA
+PROMPT_*.txt
+GUIA_*.txt
+COMANDOS_*.txt
+RESUMEN_*.txt
+CAMBIOS_*.txt
+INSTRUCCIONES_*.txt
+COMO_*.txt
+EMPEZAR_*.txt
+CHECKLIST_*.txt
+ANALISIS_*.txt
+EXPLICACION_*.txt
+LIMPIAR_*.txt
+
+# README interno (mantener solo README.md)
+README.txt
+
+# Capturas (no deben estar en el repo de código)
+capturas/
+*.png
+*.jpg
+*.jpeg
+
+# ChromeDriver (muy pesado)
+chromedriver-win64/
+*.bak
+*.swp

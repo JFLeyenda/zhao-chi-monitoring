@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Checkout - Zhao Chi</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            padding: 20px;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+        }
+        h1 {
+            color: #667eea;
+        }
+        .total {
+            font-size: 1.8em;
+            color: #667eea;
+            font-weight: bold;
+            margin: 20px 0;
+        }
+        .btn {
+            background: #667eea;
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 5px;
+            font-size: 1.1em;
+            cursor: pointer;
+            width: 100%;
+        }
+        .btn:hover {
+            background: #5568d3;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Finalizar Compra</h1>
+        
+        <div class="total">
+            Total a pagar: ${{ "{:,}".format(total) }}
+        </div>
+        
+        <p><strong>Productos en tu pedido:</strong></p>
+        <ul>
+            {% for item in carrito %}
+            <li>{{ item.nombre }} x {{ item.cantidad }}</li>
+            {% endfor %}
+        </ul>
+        
+        <br>
+        <button class="btn" onclick="procesarPago()">
+            Confirmar Compra
+        </button>
+    </div>
+    
+    <script>
+        function procesarPago() {
+            fetch('/checkout', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'}
+            })
+            .then(res => res.json())
+            .then(data => {
+                alert('¡Compra realizada exitosamente!\\nNúmero de orden: ' + data.numero_orden);
+                window.location.href = '/';
+            })
+            .catch(err => {
+                alert('Error al procesar el pago');
+            });
+        }
+    </script>
+</body>
+</html>

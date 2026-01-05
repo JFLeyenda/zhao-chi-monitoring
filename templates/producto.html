@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ producto.nombre }} - Zhao Chi</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+        }
+        h1 {
+            color: #667eea;
+        }
+        .price {
+            font-size: 2em;
+            color: #667eea;
+            font-weight: bold;
+        }
+        .btn {
+            background: #667eea;
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 5px;
+            font-size: 1.1em;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            margin-top: 20px;
+        }
+        .back-link {
+            display: inline-block;
+            margin-top: 20px;
+            color: #667eea;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>{{ producto.nombre }}</h1>
+        <div class="price">${{ "{:,}".format(producto.precio) }}</div>
+        <p><strong>Categoría:</strong> {{ producto.categoria }}</p>
+        <p><strong>Stock disponible:</strong> {{ producto.stock }} unidades</p>
+        
+        <button class="btn" onclick="agregarAlCarrito({{ producto.id }})">
+            Agregar al Carrito
+        </button>
+        
+        <br>
+        <a href="/productos" class="back-link">← Volver al catálogo</a>
+    </div>
+    
+    <script>
+        function agregarAlCarrito(productoId) {
+            fetch('/api/carrito/agregar', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({producto_id: productoId, cantidad: 1})
+            })
+            .then(res => res.json())
+            .then(data => {
+                alert(data.mensaje || 'Producto agregado');
+                window.location.href = '/carrito';
+            });
+        }
+    </script>
+</body>
+</html>

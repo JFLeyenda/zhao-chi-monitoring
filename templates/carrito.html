@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Carrito - Zhao Chi</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            padding: 20px;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+        }
+        h1 {
+            color: #667eea;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        .total {
+            font-size: 1.5em;
+            color: #667eea;
+            font-weight: bold;
+            text-align: right;
+            margin-top: 20px;
+        }
+        .btn {
+            background: #667eea;
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 5px;
+            font-size: 1.1em;
+            text-decoration: none;
+            display: inline-block;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Mi Carrito</h1>
+        
+        {% if carrito %}
+            <table>
+                <thead>
+                    <tr>
+                        <th>Producto</th>
+                        <th>Precio</th>
+                        <th>Cantidad</th>
+                        <th>Subtotal</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in carrito %}
+                    <tr>
+                        <td>{{ item.nombre }}</td>
+                        <td>${{ "{:,}".format(item.precio) }}</td>
+                        <td>{{ item.cantidad }}</td>
+                        <td>${{ "{:,}".format(item.precio * item.cantidad) }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            
+            <div class="total">
+                Total: ${{ "{:,}".format(total) }}
+            </div>
+            
+            <a href="/checkout" class="btn">Proceder al Pago</a>
+        {% else %}
+            <p>Tu carrito está vacío</p>
+            <a href="/productos" class="btn">Ir a Comprar</a>
+        {% endif %}
+    </div>
+</body>
+</html>
