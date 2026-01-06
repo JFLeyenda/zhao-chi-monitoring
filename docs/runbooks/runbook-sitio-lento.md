@@ -1,176 +1,104 @@
-# 🔧 Runbook: Sitio Web Lento
+# Runbook: Sitio Web Lento
 
 **Sistema:** Zhao Chi E-commerce  
-**Última actualización:** 2026-01-06  
-**Responsable:** Equipo de Operaciones
+**Actualizado:** 06/01/2026
 
----
+## Descripción
 
-## 📋 Descripción del Problema
-
-El sitio web está respondiendo lentamente, con tiempos de carga superiores a 5 segundos. Los usuarios reportan experiencia degradada.
+Qué hacer cuando el sitio está lento (más de 5 segundos para cargar páginas).
 
 **Síntomas:**
-- Tiempo de carga de páginas > 5 segundos
-- Alertas de monitoreo sintético
-- Quejas de usuarios en redes sociales
-- Aumento en tasa de rebote
+- Páginas demoran mucho en cargar
+- Monitoreo muestra alertas de lentitud
+- Usuarios se quejan
 
----
+## Diagnóstico Rápido
 
-## 🚨 Nivel de Severidad
+### 1. Revisar servidor
 
-**Alta** - Afecta experiencia de todos los usuarios y puede impactar ventas.
-
----
-
-## 🔍 Pasos de Diagnóstico
-
-### 1. Verificar Estado General del Sistema
+Conectarse al servidor y ver recursos:
 
 ```bash
-# Revisar estado de servidores
-ssh web-server-01
-top -n 1
+top
 free -h
 df -h
 ```
 
-**¿Qué buscar?**
-- CPU > 80%: Problema de procesamiento
-- RAM > 90%: Posible memory leak
-- Disco > 85%: Falta de espacio
+Si CPU > 80% o RAM > 90% hay problema.
 
-### 2. Revisar Logs de Aplicación
+### 2. Revisar logs
+
+Ver si hay errores:
 
 ```bash
-# Ver últimos errores
-tail -n 100 /var/log/zhao-chi/app.log | grep ERROR
-tail -n 100 /var/log/zhao-chi/app.log | grep SLOW
+tail -100 /var/log/app.log | grep ERROR
 ```
 
-**Buscar:**
-- Consultas SQL lentas
-- Timeouts de APIs externas
-- Excepciones no manejadas
+### 3. Revisar base de datos
 
-### 3. Verificar Base de Datos
+Conectar a MySQL y ver qué consultas están corriendo:
 
 ```sql
--- Consultas activas
 SHOW PROCESSLIST;
-
--- Consultas lentas recientes
-SELECT * FROM mysql.slow_log ORDER BY start_time DESC LIMIT 10;
 ```
 
-**Indicadores de problema:**
-- Consultas corriendo > 10 segundos
-- Muchas consultas en estado "Locked"
-- Conexiones activas > 80% del límite
+Si hay consultas con más de 10 segundos es problema de BD.
 
-### 4. Revisar Monitoreo APM
+## Soluciones
 
-- Abrir dashboard de APM
-- Identificar funciones con tiempo > 2 segundos
-- Revisar trace de la transacción más lenta
+### Si el problema es CPU alta
 
----
+Reiniciar la aplicación:
 
-## 🛠️ Pasos de Resolución
+```bash
+sudo systemctl restart zhao-chi-web
+```
 
-### Caso 1: CPU Alta
+Esto suele solucionar el problema temporalmente.
 
-**Causa:** Muchas peticiones concurrentes o proceso consumiendo recursos
+### Si el problema es memoria
 
-**Solución:**
-1. Identificar proceso con `top` o `htop`
-2. Si es la aplicación web:
-   ```bash
-   # Reiniciar servicio
-   sudo systemctl restart zhao-chi-web
-   ```
-3. Si es consulta SQL lenta:
-   - Identificar query en logs
-   - Agregar índice necesario
-   - Optimizar consulta
+Reiniciar aplicación:
 
-### Caso 2: Memoria Llena
+```bash
+sudo systemctl restart zhao-chi-web
+```
 
-**Causa:** Memory leak o cache sin limpiar
+También se puede limpiar el cache:
 
-**Solución:**
-1. Reiniciar aplicación para liberar memoria:
-   ```bash
-   sudo systemctl restart zhao-chi-web
-   ```
-2. Limpiar cache de Redis:
-   ```bash
-   redis-cli FLUSHDB
-   ```
-3. Monitorear si vuelve a llenarse (indica memory leak)
+```bash
+redis-cli FLUSHDB
+```
 
-### Caso 3: Base de Datos Lenta
+### Si el problema es base de datos
 
-**Causa:** Consultas sin optimizar, falta de índices, tabla bloqueada
+Matar consultas lentas:
 
-**Solución:**
-1. Matar consultas muy largas:
-   ```sql
-   KILL [process_id];
-   ```
-2. Revisar plan de ejecución de queries lentas:
-   ```sql
-   EXPLAIN SELECT * FROM productos WHERE categoria = 'electronicos';
-   ```
-3. Agregar índices faltantes:
-   ```sql
-   CREATE INDEX idx_categoria ON productos(categoria);
-   ```
+```sql
+KILL [id];
+```
 
-### Caso 4: API Externa Lenta
+Revisar si falta algún índice en las tablas que están lentas.
 
-**Causa:** Servicio de terceros (pasarela de pago, envíos) con problemas
+### Si el problema es API externa
 
-**Solución:**
-1. Verificar status del servicio externo
-2. Aumentar timeout temporalmente
-3. Implementar fallback o cache
-4. Contactar soporte del proveedor
+Revisar si el servicio externo (pagos, envíos) está funcionando bien. A veces hay que esperar a que se recupere o contactar soporte.
 
----
+## Verificar que se solucionó
 
-## ✅ Verificación de Solución
+Después de aplicar alguna solución revisar:
 
-Después de aplicar corrección, verificar:
+- Tiempo de carga del sitio (debe ser < 3 segundos)
+- CPU y RAM del servidor (deben bajar)
+- Logs sin errores nuevos
 
-1. **Monitoreo sintético:** Tiempo de carga < 3 segundos
-2. **Métricas de servidor:** CPU < 70%, RAM < 80%
-3. **Logs:** Sin errores nuevos en últimos 5 minutos
-4. **Usuarios:** Confirmar que reportes de lentitud cesaron
+## Contactos
 
----
+- Operaciones: #ops en Slack
+- Desarrollo: #dev-backend en Slack
 
-## 📝 Post-Resolución
+## Notas
 
-1. Documentar causa raíz en post-mortem
-2. Crear ticket para prevención permanente
-3. Actualizar alertas si fue falso positivo
-4. Notificar a equipo de desarrollo si requiere fix en código
+Si el problema persiste después de reiniciar, escalar a desarrollo.
 
----
-
-## 🔗 Enlaces Relacionados
-
-- Dashboard APM: http://monitoring.zhaochi.com/apm
-- Logs centralizados: http://logs.zhaochi.com
-- Runbook: Alta Demanda
-- Runbook: Base de Datos Caída
-
----
-
-## 👥 Contactos de Escalamiento
-
-- **Nivel 1:** Equipo de Operaciones (Slack: #ops)
-- **Nivel 2:** Desarrolladores Backend (Slack: #dev-backend)
-- **Nivel 3:** CTO (solo incidentes críticos)
+Documentar qué se hizo en el ticket correspondiente.
